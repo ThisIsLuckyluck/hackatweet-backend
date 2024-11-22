@@ -4,44 +4,37 @@ require("../models/connection"); //Importer la connexion avec la BDD
 const Tweet = require("../models/tweets"); // Importer le model de la
 const User = require("../models/users");
 
-router.post("/", (req, res) => {
-    const { authorId, content } = req.body;
-    const user = User.findById(authorId);
-    // let publishedDate = '';
-    // let time = new Date(infos.arrival).getTime() - new Date(infos.departure).getTime();
-    // time = new Date(time) / 1000 / 60;
-    // publishedDate = `${time} minutes`;
-    console.log();
 
-    if (!user) {
+
+// Route pour poster un tweet --------------------------------------------------------------------------------------------------------------
+router.post("/postTweet", (req, res) => {
+    
+    const { userId, content } = req.body;
+    User.findById(userId)
+    .then(user => {
+      if (!user) {
         return res.status(404).json({ error: "User not found" });
-    } else {
+      }
+    });   
         const newTweet = new Tweet({
-            // author: {
-            //     firstname: String,
-            //     username: String,
-            //     password: String,
-            //     token: String,
-            // },
-            author: authorId,
-            published_since: Date.now(),
+            author: userId,
+            published_since: new Date(),
             content,
         });
         newTweet.save().then((data) => {
-            console.log(data);
-
             res.json({
                 result: "Tweet has been successfully published,",
-                author: authorId,
-                published_since: data.published_since,
-                content,
+                data: data,
             });
         });
-    }
+    
 });
 
-router.get("/", (req, res) => {
-    Tweet.findOne({ content: req.body.content })
+
+
+// Route pour récupérer info d'un tweet par content ou par id ?----------------------------------------------------------------------------------------
+router.get("/allTweets", (req, res) => {
+    Tweet.find()
         .populate("author")
         .then((data) => {
             if (data === null) {
@@ -57,10 +50,14 @@ router.get("/", (req, res) => {
         });
 });
 
-router.put("/", (req, res) => {
-    Tweet.updateOne({ _id: req.body_id }, { content: req.body.content }).then(
-        () => {
-            Tweet.find().then((data) => {
+
+// Route pour update un tweet --------------------------------------------------------------------------------------------------------------------
+router.put("/updateById", (req, res) => {
+    Tweet.updateOne(
+        { _id: req.body._id }, 
+        { content: req.body.content }
+    ).then(() => {
+            Tweet.find().then(data => {
                 res.json({
                     result: "Tweet was modified",
                     tweet: data,
@@ -70,23 +67,19 @@ router.put("/", (req, res) => {
     );
 });
 
-router.delete("/", (req, res) => {
+
+
+// Route pour supprimer un tweet --------------------------------------------------------------------------------------------------------------------
+router.delete("/deleteById", (req, res) => {
     Tweet.deleteOne(
-        { content: req.body.content } 
+        { _id: req.body._id } 
     ).then(() => {
-        Tweet.find().then((data) => {
-            console.log(data); 
+        Tweet.find().then((data) => { 
+            res.json({result: "Tweet has been deleted"})
         });
     });
 });
 
-router.delete("/", (req, res) => {
-    Tweet.deleteMany(
-        { author: req.body.author } 
-    ).then(() => {
-        Tweet.find().then((data) => {
-        });
-    });
-});
+
 
 module.exports = router;
