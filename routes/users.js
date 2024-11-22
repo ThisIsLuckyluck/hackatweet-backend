@@ -62,6 +62,7 @@ router.get("/:username", (req, res) => {
         result: "User found",
         firstname: data.firstname,
         username: `@${data.username}`,
+        token: data.token,
       });
     } else {
       res.json({ result: false, error: "User not found" });
