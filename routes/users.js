@@ -45,7 +45,7 @@ router.post("/signin", (req, res) => {
 
   User.findOne({ username: req.body.username }).then((data) => {
     if (data && bcrypt.compareSync(req.body.password, data.password)) {
-      res.json({ result: "Connection Successfull" });
+      res.json({ result: true, token: data.token });
     } else {
       res.json({
         result: "Connection failed",
